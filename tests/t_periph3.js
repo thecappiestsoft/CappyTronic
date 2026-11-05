@@ -1,0 +1,6 @@
+const {sc,P,pw,ev,errs}=require('./periph_h.js');
+(async()=>{await new Promise(r=>setTimeout(r,300));
+await sc('ADS1115: czas konwersji 128 SPS + DAC MCP4725 EEPROM + ALRT jako RDY',{parts:[['a','adc_ads1115'],['m','dac_mcp4725']],wires:[['a','VDD','u','5V'],['a','GND','u','GND'],['a','SDA','u','A4'],['a','SCL','u','A5'],['m','VCC','u','5V'],['m','GND','u','GND'],['m','SDA','u','A4'],['m','SCL','u','A5'],['m','VOUT','a','A0'],['a','ALRT','u','D2']],
+ code:`#include <Wire.h>\n#include <Adafruit_ADS1X15.h>\n#include <Adafruit_MCP4725.h>\nAdafruit_ADS1115 ads;Adafruit_MCP4725 dac;\nvoid setup(){Serial.begin(115200);ads.begin();dac.begin(0x60);dac.setVoltage(1638,true);delay(30);unsigned long t=micros();int16_t v=ads.readADC_SingleEnded(0);t=micros()-t;Serial.print("v=");Serial.print(ads.computeVolts(v),3);Serial.print(" t=");Serial.println(t);\n ads.setDataRate(RATE_ADS1115_860SPS);t=micros();v=ads.readADC_SingleEnded(0);Serial.print("t860=");Serial.println(micros()-t);\n Wire.requestFrom(0x60,5);Serial.print("rd=");while(Wire.available()){Serial.print(Wire.read(),HEX);Serial.print(' ');}Serial.println();}\nvoid loop(){}`,secs:0.5,
+ check:`'ok'`,ok:(r,s)=>/v=(2\.000|1\.999)/.test(s)});
+console.log('errs',errs);process.exit(0)})();

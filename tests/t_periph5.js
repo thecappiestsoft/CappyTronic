@@ -1,0 +1,9 @@
+const {sc,P,pw,ev,errs}=require('./periph_h.js');
+(async()=>{await new Promise(r=>setTimeout(r,300));
+await sc('WS2812 + Adafruit_NeoPixel (protokół czasowy) + łańcuch DOUT',{parts:[['s','ws2812'],['t','ws2812']],wires:[['s','5V','u','5V'],['s','GND','u','GND'],['s','DIN','u','D6'],['t','5V','u','5V'],['t','GND','u','GND'],['s',3,'t','DIN']],
+ code:`#include <Adafruit_NeoPixel.h>\nAdafruit_NeoPixel px(10,6,NEO_GRB+NEO_KHZ800);\nvoid setup(){px.begin();px.setPixelColor(0,px.Color(255,0,0));px.setPixelColor(1,px.Color(0,128,0));px.setPixelColor(7,px.Color(0,0,77));px.setPixelColor(9,px.Color(10,20,30));px.show();}\nvoid loop(){}`,secs:0.2,
+ check:`JSON.stringify([${P('s')}.s.px.slice(0,2),${P('s')}.s.px[7],${P('t')}.s.px&&${P('t')}.s.px.slice(0,2)])`,ok:r=>r==='[[[255,0,0],[0,128,0]],[0,0,77],[[0,0,0],[10,20,30]]]'});
+await sc('MCP23017: przerwanie INTA przy zmianie wejścia (INTCAP)',{parts:[['m','io_mcp23017'],['b','button']],wires:[['m','VDD','u','5V'],['m','VSS','u','GND'],['m','SDA','u','A4'],['m','SCL','u','A5'],['m','A0','u','GND'],['m','A1','u','GND'],['m','A2','u','GND'],['m','RESET̅','u','5V'],['m','INTA','u','D2'],['b',0,'m','GPA3'],['b',1,'u','GND']],
+ code:`#include <Wire.h>\nvoid wr(uint8_t r,uint8_t v){Wire.beginTransmission(0x20);Wire.write(r);Wire.write(v);Wire.endTransmission();}\nuint8_t rd(uint8_t r){Wire.beginTransmission(0x20);Wire.write(r);Wire.endTransmission();Wire.requestFrom(0x20,1);return Wire.read();}\nvoid setup(){Serial.begin(115200);Wire.begin();wr(0x0C,0xFF);wr(0x04,0x08);rd(0x12);pinMode(2,INPUT);}\nvoid loop(){static int last=1;int v=digitalRead(2);if(v!=last){last=v;Serial.print("INTA=");Serial.print(v);if(!v){Serial.print(" INTF=");Serial.print(rd(0x0E),HEX);Serial.print(" CAP=");Serial.print(rd(0x10),HEX);}Serial.println();}}`,secs:0.6,pressAt:0.3,press:"M.b.props.pressed=true;E.dirty=true",
+ check:`'x'`,ok:(r,s)=>/INTA=0 INTF=8 CAP=F7/.test(s)});
+console.log('errs',errs);process.exit(0)})();

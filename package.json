@@ -1,0 +1,40 @@
+{
+  "name": "cappytronic",
+  "productName": "CappyTronic",
+  "version": "2.4.0",
+  "description": "CappyTronic – edukacyjny symulator obwodów elektronicznych: Arduino, ESP32/ESP8266/Pico (MicroPython i C++), STM32, PIC",
+  "license": "MIT",
+  "author": "CappySoft.pl",
+  "private": true,
+  "type": "commonjs",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "deps": "node scripts/fetch-deps.mjs",
+    "toolchain": "node scripts/fetch-deps.mjs && node scripts/build-avr-libs.mjs && node scripts/build-wasm-cores.mjs && node scripts/build-stm32-core.mjs",
+    "examples": "node scripts/precompile-examples.mjs",
+    "build:html": "node scripts/build-all.mjs --target=html",
+    "build:linux": "node scripts/build-all.mjs --target=linux",
+    "build:win": "node scripts/build-all.mjs --target=win",
+    "build:mac": "node scripts/build-all.mjs --target=mac",
+    "html": "node scripts/build-html.mjs",
+    "start": "node scripts/dev.mjs",
+    "test": "node tests/run-all.js"
+  },
+  "dependencies": {
+    "aedes": "1.2.0",
+    "mqtt": "5.16.1"
+  },
+  "devDependencies": {
+    "@electron/packager": "18.3.6",
+    "@fontsource/baloo-2": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@fontsource/lexend": "5.3.0",
+    "@micropython/micropython-webassembly-pyscript": "1.27.0",
+    "avr8js": "0.21.1",
+    "codemirror": "5.65.21",
+    "electron": "33.2.1",
+    "esbuild": "0.23.1",
+    "extract-zip": "2.0.1",
+    "jsdom": "24.1.3"
+  }
+}

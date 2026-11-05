@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=CappyTronic
+GenericName=Electronics simulator
+GenericName[pl]=Symulator elektroniki
+Comment=Circuit, Arduino and MicroPython simulator
+Comment[pl]=Symulator obwodów, Arduino i MicroPythona
+Exec=CappyTronic.sh %F
+Icon=cappytronic
+Terminal=false
+Categories=Education;Electronics;Science;Development;
+Keywords=arduino;electronics;circuit;simulator;micropython;elektronika;
+StartupWMClass=CappyTronic

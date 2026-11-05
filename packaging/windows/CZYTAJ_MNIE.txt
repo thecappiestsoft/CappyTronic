@@ -1,0 +1,14 @@
+CappyTronic 2.4.0 dla Windows (x64)
+===================================
+
+Uruchomienie: rozpakuj archiwum w dowolnym miejscu i uruchom cappytronic.exe (instalacja nie jest potrzebna).
+Program działa offline – kompilatory Arduino (avr-gcc), C++ dla płytek ESP/Pico (clang) i STM32 (arm-none-eabi-gcc)
+są w katalogu resources. Jeśli ścieżka zawiera polskie znaki, przy pierwszej kompilacji kompilator zostanie
+skopiowany do C:\ProgramData\CappyTronic (gcc nie obsługuje takich ścieżek).
+
+Wgrywanie do płytek przez USB: zakładka Kod → „Wgraj do urządzenia”. Klony Arduino z układem CH340 wymagają
+sterownika CH340 (Windows 10/11 zwykle instaluje go sam przez Windows Update).
+
+Zapora Windows może zapytać o dostęp do sieci przy pierwszym uruchomieniu serwera MQTT – wystarczy „sieci prywatne”.
+
+Licencje: plik LICENSE (CappyTronic – MIT) oraz THIRD_PARTY.md w kodzie źródłowym (komponenty zewnętrzne).

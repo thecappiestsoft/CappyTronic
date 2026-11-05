@@ -1,0 +1,50 @@
+# CappyTronic – umqtt.robust: ponawia połączenie po błędzie
+import _rt
+from umqtt import simple
+
+
+class MQTTClient(simple.MQTTClient):
+    DELAY = 2
+    DEBUG = False
+
+    def delay(self, i):
+        _rt.wait(self.DELAY)
+
+    def log(self, in_reconnect, e):
+        if self.DEBUG:
+            print('mqtt reconnect: %r' % e if in_reconnect else 'mqtt: %r' % e)
+
+    def reconnect(self):
+        i = 0
+        while True:
+            try:
+                return super().connect(False)
+            except OSError as e:
+                self.log(True, e)
+                i += 1
+                self.delay(i)
+
+    def publish(self, topic, msg, retain=False, qos=0):
+        while True:
+            try:
+                return super().publish(topic, msg, retain, qos)
+            except OSError as e:
+                self.log(False, e)
+            self.reconnect()
+
+    def wait_msg(self):
+        while True:
+            try:
+                return super().wait_msg()
+            except OSError as e:
+                self.log(False, e)
+            self.reconnect()
+
+    def check_msg(self, attempts=2):
+        while attempts:
+            try:
+                return super().check_msg()
+            except OSError as e:
+                self.log(False, e)
+            self.reconnect()
+            attempts -= 1

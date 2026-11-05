@@ -1,0 +1,39 @@
+CappyTronic 2.4.0 dla Linuksa (x64)
+===================================
+
+Uruchomienie bez instalacji:
+  tar xzf CappyTronic-2.4.0-Linux-x64.tar.gz
+  cd CappyTronic-2.4.0-Linux-x64
+  ./CappyTronic.sh
+
+Instalacja w systemie (menu aplikacji, polecenie „cappytronic”):
+  sudo ./install.sh          (odinstalowanie: sudo ./uninstall.sh)
+
+Wymagania: 64-bitowy Linux z glibc 2.28 lub nowszym (Ubuntu 20.04+, Debian 11+, Fedora 36+, Mint 20+),
+środowisko graficzne (X11 lub Wayland). Program działa offline – wszystkie kompilatory są w paczce:
+  • Arduino AVR (Uno, Nano, Mega, ATmega328P, ATtiny85): avr-gcc 14.1
+  • C++ (Arduino) dla ESP32-C3-Zero, ESP32 DevKit, NodeMCU ESP8266 i Pico W: clang 19 (wasi-sdk) → WebAssembly
+  • STM32F103C8T6 (Blue Pill): arm-none-eabi-gcc 13.3 + rdzeń Arduino CappyTronic (API jak STM32duino)
+  • PIC16F84A i PIC18F4550: wbudowany asembler (składnia MPASM); można też wczytać plik HEX z MPLAB X / XC8
+
+Nowe w 2.4.0:
+  • Wgrywanie programów do prawdziwych płytek przez USB (przycisk „Wgraj do urządzenia” w zakładce Kod): Arduino Uno, Nano,
+    Mega, ATmega328P, ATtiny85 (Arduino as ISP), STM32 Blue Pill (bootloader UART), ESP32/ESP8266/Pico W z MicroPythonem.
+    W Linuksie dostęp do portów szeregowych wymaga grupy „dialout” (install.sh dodaje ją automatycznie).
+
+Nowe w 2.3.0:
+  • Płytki Wi-Fi (ESP32-C3-Zero, ESP32, NodeMCU, Pico W): wybór języka MicroPython albo C++ (Arduino) w zakładce Kod.
+    W C++ działają m.in. WiFi, PubSubClient (MQTT), HTTPClient, WebServer (strona płytki pod http://127.0.0.1:8080/),
+    ArduinoJson, Adafruit_NeoPixel, Adafruit GFX/SSD1306, LEDC/PWM, przerwania.
+  • ENC28J60 (Ethernet, EtherCard): pełna emulacja układu i wirtualny router 192.168.50.1 (DHCP, DNS, ping, NTP,
+    połączenia TCP przez sieć komputera); strona WWW modułu pod http://127.0.0.1:8090/.
+  • PIC16F84A i PIC18F4550: emulacja rdzenia i peryferiów (timery, przerwania, EEPROM, ADC, PWM, UART, I2C/SPI w PIC18).
+  • STM32F103 Blue Pill: emulacja ARM Cortex-M3 i rejestrów (RCC, GPIO, EXTI, NVIC, SysTick, TIM, USART, ADC, I2C, SPI).
+
+Piaskownica: instalator ustawia chrome-sandbox (root, SUID) – wtedy aplikacja działa w pełnej piaskownicy Chromium.
+Bez instalacji, na systemach blokujących przestrzenie nazw użytkownika (np. Ubuntu 24.04), CappyTronic.sh
+uruchamia program z opcją --no-sandbox.
+
+Sieć: serwer MQTT domyślnie na porcie 1883 tylko na tym komputerze; strony WWW płytek (8080+) i modułów ENC28J60 (8090+)
+też tylko lokalnie. Udostępnianie w sieci lokalnej włączysz w zakładce MQTT; jeśli używasz zapory (ufw), otwórz porty,
+np.: sudo ufw allow 1883/tcp. Połączenia płytek z internetem są domyślnie zablokowane (tylko sieć lokalna).

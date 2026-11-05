@@ -1,0 +1,10 @@
+CappyTronic 2.4.0 dla macOS
+===========================
+
+Uruchomienie: przeciągnij CappyTronic.app do folderu Programy. Aplikacja nie jest podpisana certyfikatem Apple, więc
+przy pierwszym uruchomieniu kliknij ją z klawiszem Control → „Otwórz” (albo w Terminalu: xattr -cr /Applications/CappyTronic.app).
+
+Program działa offline – kompilatory Arduino (avr-gcc 7.3), C++ dla płytek ESP/Pico (clang) i STM32 (arm-none-eabi-gcc)
+są wewnątrz aplikacji. Na komputerach z procesorem Apple Silicon avr-gcc działa przez Rosettę 2 (macOS zaproponuje instalację).
+
+Wgrywanie do płytek przez USB: zakładka Kod → „Wgraj do urządzenia”. Klony Arduino z układem CH340 mogą wymagać sterownika producenta.
