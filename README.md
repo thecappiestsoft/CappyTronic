@@ -5,7 +5,7 @@ i cyfrowa, mikrokontrolery programowane w Arduino C++, MicroPythonie i asemblerz
 eksport do JSON i KiCad oraz wgrywanie programów do prawdziwych płytek przez USB. Interfejs po polsku i angielsku,
 działa offline.
 
-Wersja: **2.4.1**
+Wersja: **2.5.0**
 
 ## Co jest w środku
 
@@ -142,9 +142,9 @@ na Apple Silicon działa przez Rosettę. Można też wskazać własny: `AVR\_GCC
 
 |System|Polecenie|Wynik w `dist/`|
 |-|-|-|
-|Linux|`./build-scripts/build-linux.sh`|`CappyTronic-2.4.1-Linux-x64.tar.gz`|
-|Windows|`build-scripts\build-windows.bat` (dwuklik)|`CappyTronic-2.4.1-Windows-x64.zip`|
-|macOS|`./build-scripts/build-mac.sh` albo dwuklik `build-scripts/build-mac.command`|`CappyTronic-2.4.1-macOS-<arch>.zip`|
+|Linux|`./build-scripts/build-linux.sh`|`CappyTronic-2.5.0-Linux-x64.tar.gz`|
+|Windows|`build-scripts\build-windows.bat` (dwuklik)|`CappyTronic-2.5.0-Windows-x64.zip`|
+|macOS|`./build-scripts/build-mac.sh` albo dwuklik `build-scripts/build-mac.command`|`CappyTronic-2.5.0-macOS-<arch>.zip`|
 |Jeden plik HTML|`./build-scripts/build-html.sh` / `build-scripts\build-html.bat`|`CappyTronic.html`|
 
 Skrypty leżą w folderze `build-scripts/`, ale zawsze pracują w katalogu głównym repozytorium – można je uruchamiać
