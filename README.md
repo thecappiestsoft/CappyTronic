@@ -5,7 +5,7 @@ i cyfrowa, mikrokontrolery programowane w Arduino C++, MicroPythonie i asemblerz
 eksport do JSON i KiCad oraz wgrywanie programów do prawdziwych płytek przez USB. Interfejs po polsku i angielsku,
 działa offline.
 
-Wersja: **2.4.0**
+Wersja: **2.4.1**
 
 ## Co jest w środku
 
@@ -59,7 +59,7 @@ packaging/              pliki dołączane do paczek (Linux: uruchamianie i insta
 tests/                  testy (jsdom + kompilatory) – npm test
 docs/ARCHITEKTURA.md    opis działania dla programistów
 
-build-scripts		pliki do budowania aplikacji desktopowych i pliku 			html
+build-scripts/          skrypty budowania (dwuklik / terminal) – lokalnie i w Dockerze (docker-build.*)
 ```
 
 Katalogi tworzone przez skrypty (nie należą do źródeł): `node\_modules/`, `vendor/` (pobrane kompilatory i źródła
@@ -80,12 +80,29 @@ na Apple Silicon działa przez Rosettę. Można też wskazać własny: `AVR\_GCC
 
 |System|Polecenie|Wynik w `dist/`|
 |-|-|-|
-|Linux|`./build-linux.sh`|`CappyTronic-2.4.0-Linux-x64.tar.gz`|
-|Windows|`build-windows.bat` (dwuklik)|`CappyTronic-2.4.0-Windows-x64.zip`|
-|macOS|`./build-mac.sh` albo dwuklik `build-mac.command`|`CappyTronic-2.4.0-macOS-<arch>.zip`|
-|Jeden plik HTML|`./build-html.sh` / `build-html.bat`|`CappyTronic.html`|
+|Linux|`./build-scripts/build-linux.sh`|`CappyTronic-2.4.1-Linux-x64.tar.gz`|
+|Windows|`build-scripts\build-windows.bat` (dwuklik)|`CappyTronic-2.4.1-Windows-x64.zip`|
+|macOS|`./build-scripts/build-mac.sh` albo dwuklik `build-scripts/build-mac.command`|`CappyTronic-2.4.1-macOS-<arch>.zip`|
+|Jeden plik HTML|`./build-scripts/build-html.sh` / `build-scripts\build-html.bat`|`CappyTronic.html`|
 
-!Skrypty znajdują się w folderze build-scripts/!
+Skrypty leżą w folderze `build-scripts/`, ale zawsze pracują w katalogu głównym repozytorium – można je uruchamiać
+z dowolnego miejsca (także dwuklikiem). Wynik trafia do `dist/` w katalogu głównym.
+
+### Budowanie w Dockerze (bez instalowania Node.js)
+
+Jeśli nie chcesz instalować Node.js / npm albo masz inne ich wersje, użyj Dockera. Skrypt uruchamia czysty kontener
+`node:20`, kopiuje do niego kod, instaluje zależności, buduje i **usuwa kontener**. Na komputerze zostaje tylko plik
+wynikowy w `dist/` – bez `node_modules/`, `vendor/` i `build/`. Wymagany jest tylko Docker (Docker Desktop w Windows/macOS).
+
+|System|Polecenie|
+|-|-|
+|Windows|`build-scripts\docker-build.bat` (dwuklik – pyta o cel) albo `docker-build.bat win\|linux\|mac\|html`|
+|Linux / macOS|`./build-scripts/docker-build.sh win\|linux\|mac\|html`|
+
+Opcje: `html --quick` – sam plik HTML bez kompilacji przykładów; `--remove-image` – po zakończeniu usuwa też obraz
+`node:20` (domyślnie zostaje w Dockerze, aby kolejne budowanie nie pobierało go od nowa). Każde budowanie w Dockerze
+pobiera kompilatory i biblioteki od zera (ok. 1 GB). Wersja dla macOS zbudowana w Dockerze nie ma podpisu ad-hoc
+(`codesign`) – na Macu lepiej użyć `build-mac.sh`.
 
 Każdy skrypt sprawdza Node.js, instaluje zależności (`npm ci`) i uruchamia `node scripts/build-all.mjs` z celem.
 Kolejne kroki:

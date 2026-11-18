@@ -1,9 +1,9 @@
-CappyTronic 2.4.0 dla Linuksa (x64)
+CappyTronic 2.4.1 dla Linuksa (x64)
 ===================================
 
 Uruchomienie bez instalacji:
-  tar xzf CappyTronic-2.4.0-Linux-x64.tar.gz
-  cd CappyTronic-2.4.0-Linux-x64
+  tar xzf CappyTronic-2.4.1-Linux-x64.tar.gz
+  cd CappyTronic-2.4.1-Linux-x64
   ./CappyTronic.sh
 
 Instalacja w systemie (menu aplikacji, polecenie „cappytronic”):

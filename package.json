@@ -1,7 +1,7 @@
 {
   "name": "cappytronic",
   "productName": "CappyTronic",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "CappyTronic – edukacyjny symulator obwodów elektronicznych: Arduino, ESP32/ESP8266/Pico (MicroPython i C++), STM32, PIC",
   "license": "MIT",
   "author": "CappySoft.pl",
