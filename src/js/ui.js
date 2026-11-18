@@ -108,12 +108,13 @@ function seated(bb) {
 
 /* ================= EDYCJA ================= */
 function select(k, id) { sel = k ? { k, id } : null; dirty = true; if (sel && sel.k === 'c') { const c = byId(id); if (c && PARTS[c.type].mcu) codeBind(c); } renderProps(); if (sel && innerWidth <= 980) $('#props').classList.add('open'); }
-function addComp(type, wx, wy) {
+function addComp(type, wx, wy, extra) { // extra – właściwości nadpisujące domyślne (np. pozycja z biblioteki zewnętrznej)
   const P = PARTS[type]; if (P.locked) { toast(t('lockedPart', { n: L(P.name) })); showLocked(P); return; }
   if (running) return toast(t('stopToEdit'));
   pushHist(); const b = typeof P.bbox === 'function' ? P.bbox({ props: P.props }) : P.bbox;
   const c = { id: newId(), type, x: Math.round((wx - (b[0] + b[2]) / 2) / G) * G, y: Math.round((wy - (b[1] + b[3]) / 2) / G) * G, rot: 0, props: JSON.parse(JSON.stringify(P.props || {})) };
   if (P.mcu) c.props.code = P.props.code;
+  if (extra) Object.assign(c.props, JSON.parse(JSON.stringify(extra)));
   if (type === 'bb') S.comps.unshift(c); else S.comps.push(c);
   changed(); select('c', c.id);
 }
@@ -204,14 +205,16 @@ const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').repla
 function partSearchText(P) { return norm([P.id, L(P.name), P.name && P.name.pl, P.name && P.name.en, typeof P.sub === 'object' ? (P.sub.pl + ' ' + P.sub.en) : P.sub || '', P.kw || '', L(CATS.find(c => c[0] === P.cat)[1])].join(' ')); }
 let openCats = new Set(JSON.parse(LS.get('cappytronic.cats') || '["basic"]'));
 const itemHtml = P => `<div class="pal-item${P.locked ? ' locked' : ''}" data-type="${P.id}" tabindex="0" role="button" title="${esc(L(P.name))}"><div class="pal-thumb">${P.locked ? '<svg viewBox="0 0 40 40"><rect x="8" y="10" width="24" height="20" rx="3" fill="#2b2f36" stroke="#000"/>' + [0, 1, 2, 3].map(i => `<rect x="${11 + i * 5}" y="5" width="2" height="5" fill="#bbb"/><rect x="${11 + i * 5}" y="30" width="2" height="5" fill="#bbb"/>`).join('') + '</svg>' : mini(P.id)}</div><span class="nm">${esc(L(P.name))}</span>${P.sub ? `<span class="sb">${esc(L(P.sub))}</span>` : ''}</div>`;
+const palParts = () => Object.values(PARTS).filter(P => !P.ext); // P.ext – rodziny modeli biblioteki zewnętrznej (tylko w jej zakładce)
 function buildPalette() {
+  if (typeof palTab !== 'undefined' && palTab === 'ext') return buildExtPalette();
   const q = norm($('#search').value.trim()); const list = $('#plist'); let h = '';
   if (q) {
-    const words = q.split(/\s+/); const hits = Object.values(PARTS).filter(P => { const s = partSearchText(P); return words.every(w => s.includes(w)); });
+    const words = q.split(/\s+/); const hits = palParts().filter(P => { const s = partSearchText(P); return words.every(w => s.includes(w)); });
     h = hits.length ? `<div class="pal-grid">${hits.map(itemHtml).join('')}</div>` : `<div class="empty-s">${t('noResults')}</div>`;
   } else {
     for (const [cid, cname] of CATS) {
-      const items = Object.values(PARTS).filter(P => P.cat === cid || (P.also || []).includes(cid)); if (!items.length) continue;
+      const items = palParts().filter(P => P.cat === cid || (P.also || []).includes(cid)); if (!items.length) continue;
       const open = openCats.has(cid);
       h += `<details class="cat" data-cat="${cid}"${open ? ' open' : ''}><summary>${esc(L(cname))}<span class="n">${items.length}</span></summary>${open ? `<div class="pal-grid">${items.map(itemHtml).join('')}</div>` : ''}</details>`;
     }
@@ -221,19 +224,21 @@ function buildPalette() {
 $('#search').addEventListener('input', buildPalette);
 $('#plist').addEventListener('toggle', e => {
   const d = e.target; if (!d.classList || !d.classList.contains('cat')) return; const cid = d.dataset.cat;
-  if (d.open) { openCats.add(cid); if (!d.querySelector('.pal-grid')) { const items = Object.values(PARTS).filter(P => P.cat === cid || (P.also || []).includes(cid)); d.insertAdjacentHTML('beforeend', `<div class="pal-grid">${items.map(itemHtml).join('')}</div>`); } } else openCats.delete(cid);
+  if (d.open) { openCats.add(cid); if (!d.querySelector('.pal-grid')) { const items = palParts().filter(P => P.cat === cid || (P.also || []).includes(cid)); d.insertAdjacentHTML('beforeend', `<div class="pal-grid">${items.map(itemHtml).join('')}</div>`); } } else openCats.delete(cid);
   LS.set('cappytronic.cats', JSON.stringify([...openCats]));
 }, true);
 (function paletteDrag() {
   const pal = $('#plist'); let gd = null;
-  pal.addEventListener('pointerdown', e => { const it = e.target.closest('.pal-item'); if (!it) return; e.preventDefault(); it.setPointerCapture(e.pointerId); gd = { it, type: it.dataset.type, sx: e.clientX, sy: e.clientY, ghost: null }; });
-  pal.addEventListener('pointermove', e => { if (!gd || PARTS[gd.type].locked) return; if (!gd.ghost && Math.hypot(e.clientX - gd.sx, e.clientY - gd.sy) > 6) { gd.ghost = document.createElement('div'); gd.ghost.className = 'ghost'; gd.ghost.innerHTML = `<div class="pal-thumb">${mini(gd.type)}</div>`; document.body.appendChild(gd.ghost); } if (gd.ghost) { gd.ghost.style.left = e.clientX + 'px'; gd.ghost.style.top = e.clientY + 'px'; } });
+  // pozycja biblioteki zewnętrznej (data-lcsc) wstawia element z właściwościami z katalogu
+  const palProps = it => it.dataset.lcsc && typeof lcscProps === 'function' ? lcscProps(it.dataset.lcsc) : undefined;
+  pal.addEventListener('pointerdown', e => { const it = e.target.closest('.pal-item'); if (!it) return; e.preventDefault(); it.setPointerCapture(e.pointerId); gd = { it, type: it.dataset.type, props: palProps(it), sx: e.clientX, sy: e.clientY, ghost: null }; });
+  pal.addEventListener('pointermove', e => { if (!gd || PARTS[gd.type].locked) return; if (!gd.ghost && Math.hypot(e.clientX - gd.sx, e.clientY - gd.sy) > 6) { gd.ghost = document.createElement('div'); gd.ghost.className = 'ghost'; gd.ghost.innerHTML = `<div class="pal-thumb">${mini(gd.type, gd.props && Object.assign({}, PARTS[gd.type].props, gd.props))}</div>`; document.body.appendChild(gd.ghost); } if (gd.ghost) { gd.ghost.style.left = e.clientX + 'px'; gd.ghost.style.top = e.clientY + 'px'; } });
   pal.addEventListener('pointerup', e => { if (!gd) return; const r = svg.getBoundingClientRect();
-    if (gd.ghost) { gd.ghost.remove(); if (e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom) { const [wx, wy] = toWorld(e); addComp(gd.type, wx, wy); } }
-    else addComp(gd.type, (r.width / 2 - view.x) / view.k, (r.height / 2 - view.y) / view.k);
+    if (gd.ghost) { gd.ghost.remove(); if (e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom) { const [wx, wy] = toWorld(e); addComp(gd.type, wx, wy, gd.props); } }
+    else addComp(gd.type, (r.width / 2 - view.x) / view.k, (r.height / 2 - view.y) / view.k, gd.props);
     gd = null; });
   pal.addEventListener('pointercancel', () => { if (gd && gd.ghost) gd.ghost.remove(); gd = null; });
-  pal.addEventListener('keydown', e => { const it = e.target.closest('.pal-item'); if (it && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); const r = svg.getBoundingClientRect(); addComp(it.dataset.type, (r.width / 2 - view.x) / view.k, (r.height / 2 - view.y) / view.k); } });
+  pal.addEventListener('keydown', e => { const it = e.target.closest('.pal-item'); if (it && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); const r = svg.getBoundingClientRect(); addComp(it.dataset.type, (r.width / 2 - view.x) / view.k, (r.height / 2 - view.y) / view.k, palProps(it)); } });
 })();
 function showLocked(P) { lockedShown = P; tab = 'props'; sel = null; renderProps(); }
 let lockedShown = null;
@@ -277,7 +282,7 @@ function renderProps() {
   if (sel && sel.k === 'c') {
     const c = byId(sel.id); if (!c) { sel = null; return renderProps(); } const P = PARTS[c.type];
     const d = running ? devOf(c) : null; const w = d ? warnText(d) : '';
-    pb.innerHTML = `<div class="ph"><div class="ic">${mini(c.type, c.props)}</div><div><h2>${esc(L(P.name))}</h2>${P.sub ? `<div class="sb">${esc(L(P.sub))}</div>` : ''}</div></div><p class="info">${esc(L(P.info || ''))}</p>` +
+    pb.innerHTML = `<div class="ph"><div class="ic">${mini(c.type, c.props)}</div><div><h2>${esc(L(P.name))}</h2>${P.sub ? `<div class="sb">${esc(L(P.sub))}</div>` : ''}</div></div><p class="info">${esc(L(P.info || ''))}</p>` + (c.props.lcsc && typeof lcscInfoHtml === 'function' ? lcscInfoHtml(c) : '') +
       (w ? `<div class="warnbox" id="warnbox">${esc(w)}</div>` : '<div id="warnbox" hidden></div>') +
       (P.ui || []).map(u => ctlHtml(c, u)).join('') +
       (P.mcu ? `<div class="acts"><button class="btn pri" data-act="code">${t('tabCode')} →</button>${running ? `<button class="btn" data-act="reset">${t('resetMcu')}</button>` : ''}</div>` : '') +

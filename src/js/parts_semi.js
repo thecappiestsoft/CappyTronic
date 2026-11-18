@@ -65,7 +65,8 @@ function bjtI(vbe, vbc, m) { // NPN: zwraca [Ic, Ib]
   const eb = jexp(vbe / (m.n * VT), m.Is), ec = jexp(vbc / (m.n * VT), m.Is);
   const ibe = m.Is / m.bf * (eb - 1), ibc = m.Is / m.br * (ec - 1);
   const vce = vbe - vbc;
-  const ict = m.Is * (eb - ec) * (1 + Math.max(-0.9, vce / m.va));
+  // efekt Early’ego: dla U_CE < 0 (praca odwrotna) też ≥ 1 – czynnik malejący do 0,1 dawał fałszywe rozwiązania Newtona (np. 2N3906 jako klucz górny)
+  const ict = m.Is * (eb - ec) * (1 + Math.abs(vce) / m.va);
   return [ict - ibc, ibe + ibc];
 }
 const ROLE = { C: { pl: 'C – kolektor', en: 'C – collector' }, B: { pl: 'B – baza', en: 'B – base' }, E: { pl: 'E – emiter', en: 'E – emitter' }, D: { pl: 'D – dren', en: 'D – drain' }, G: { pl: 'G – bramka', en: 'G – gate' }, S: { pl: 'S – źródło', en: 'S – source' },

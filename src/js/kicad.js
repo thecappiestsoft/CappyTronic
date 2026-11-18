@@ -209,7 +209,7 @@ function kiExportSch() {
     (property "Value" ${q(val)} (at ${mm(cx)} ${mm(by)} 0) ${FONT})
     (property "Footprint" ${q(fp)} (at ${mm(cx)} ${mm(cy)} 0) ${FONTH})
     (property "Datasheet" ${q(ds)} (at ${mm(cx)} ${mm(cy)} 0) ${FONTH})
-    (property "CappyTronic" ${q(meta)} (at ${mm(cx)} ${mm(cy)} 0) ${FONTH})
+${c.props.lcsc ? `    (property "LCSC" ${q(c.props.lcsc)} (at ${mm(cx)} ${mm(cy)} 0) ${FONTH})\n` : ''}    (property "CappyTronic" ${q(meta)} (at ${mm(cx)} ${mm(cy)} 0) ${FONTH})
 ${g.pins.map(p => `    (pin ${q(p.num)} (uuid ${uuid()}))`).join('\n')}
     (instances (project ${q(proj)} (path ${q('/' + root)} (reference ${q(c._ref)}) (unit 1)))))\n`;
     // przewody i etykiety sieci

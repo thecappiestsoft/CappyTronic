@@ -108,6 +108,50 @@ def('my_led', {
 Teksty dla użytkownika dodaje się w obu językach w `i18n.js`. Element trafia do testów w `tests/t_parts.js`
 (automatyczny przegląd wszystkich elementów).
 
+## Biblioteka zewnętrzna (LCSC)
+
+Katalog części ze sklepu LCSC składa się z trzech modułów (kolejność w `MODULES`):
+
+| Moduł | Rola |
+|---|---|
+| `parts_lcsc.js` (po `parts_passive`) | rodziny modeli, których brakowało w symulatorze: diody `x_diode` (Schottky, Zener; model w `props.model`), BJT SOT-23 `x_q_*`, MOSFET-y `x_m_*`, LMV324 `x_op_lmv324`, LDO `x_ldo_*` (napięcie w `props.v`) |
+| `lcsc_catalog.js` | dane: `LCSC_CATALOG` (pozycje) i `LCSC_PARAMS` (opis kluczy parametrów) |
+| `ui_lcsc.js` (po `ui`) | zakładka palety, wyszukiwarka, dane pozycji w panelu właściwości |
+
+Pozycja katalogu nie jest nowym typem elementu. Wskazuje istniejący typ (`type`) i jego właściwości (`props`).
+Jeden model obsługuje wiele numerów katalogowych: np. trzy pozycje AMS1117 używają rodziny `x_ldo_ams1117`
+z różnym `props.v`, a MMBT3904 korzysta z modelu `q_2n3904`. Rodziny są budowane tymi samymi funkcjami co
+wbudowane elementy (`diodePart`, `bjtPart`, `fetPart`, `opampIC`, `regPart`). Mają flagę `P.ext = true`, dlatego
+nie ma ich w zakładce „Części” (`palParts()` w `ui.js`).
+
+Wstawianie: element palety ma atrybut `data-lcsc`. `lcscProps(numer)` zwraca właściwości pozycji z dopisanym
+`lcsc`, a `addComp(typ, x, y, props)` nakłada je na domyślne. `c.props.lcsc` jest zapisywane w projekcie.
+Korzystają z niego panel właściwości (`lcscInfoHtml`, ostrzega, gdy właściwości zmieniono) i eksport KiCad
+(pole `LCSC` symbolu).
+
+Wyszukiwanie (`lcscSearch`): każde słowo zapytania musi pasować.
+
+* `klucz<op>wartość` (`=`, `:`, `<`, `<=`, `>`, `>=`) porównuje `p[klucz]` po przeliczeniu wartości przez `parseSI`.
+  Przy tym rozróżniane są `M` i `m`.
+* `C` z cyframi szuka od początku numeru LCSC.
+* Pojedyncza litera dopasowuje całe słowo.
+* Pozostałe słowa szukają w tekście pozycji (`lcscHaystack`): numerze LCSC, MPN, producencie, obudowie, nazwie
+  i kategorii elementu oraz w wartościach parametrów w kilku zapisach (`10k`, `10kΩ`, `4k7`, `100n`, `0.1u`).
+
+Dodawanie kolejnych pozycji:
+
+1. Jeśli symulator ma już model: dopisz obiekt do `LCSC_CATALOG` (pola opisane w nagłówku pliku; skróty `lcR`,
+   `lcC`, `lcLed`).
+2. Jeśli modelu brak: dopisz rodzinę w `parts_lcsc.js`. Parametry weź z karty katalogowej; wartości typowe opisz
+   w komentarzu. Wywołaj `extPart(id)`, a w pozycji katalogu podaj `type: id`. Rodzinę z wieloma wariantami
+   najlepiej parametryzować właściwością (`model`, `v`).
+3. Model zastępczy (`sim: 'approx'`) wymaga pola `note` z opisem różnic.
+4. Uruchom `node scripts/build-html.mjs` i `node tests/t_lcsc.js`. Test sprawdza pola wszystkich pozycji,
+   wyszukiwarkę, wstawianie każdej pozycji do symulacji i wartości z kart (np. dropout LDO, R_DS(on), U_F, β).
+
+Uwaga do modeli BJT: czynnik Early’ego w `bjtI` (`parts_semi.js`) jest liczony z |U_CE|. Dawniej dla U_CE < 0
+malał do 0,1 i dawał fałszywe rozwiązania Newtona, np. PNP jako klucz górny ustalał się na kilkudziesięciu woltach.
+
 ## Testy
 
 `npm test` uruchamia `tests/run-all.js`. Testy ładują `dist/CappyTronic.html` do jsdom i budują obwody kodem.

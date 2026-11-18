@@ -3,8 +3,8 @@
 export const APP = { name: 'CappyTronic', id: 'pl.cappysoft.cappytronic', version: '2.4.1', electron: '33.2.1', copyright: '© 2026 CappySoft.pl' };
 
 // Moduły aplikacji (src/js) – sklejane w tej kolejności do jednego skryptu strony.
-export const MODULES = ['util', 'i18n', 'engine', 'draw', 'parts_core', 'parts_semi', 'parts_analog', 'parts_logic', 'parts_passive', 'mcu', 'parts_mcu',
-  'pyboard', 'parts_py', 'periph', 'ethnet', 'picasm', 'pic16', 'pic18', 'stm32', 'cpuchip', 'examples', 'ui', 'mats', 'kicad', 'ui_net', 'upload'];
+export const MODULES = ['util', 'i18n', 'engine', 'draw', 'parts_core', 'parts_semi', 'parts_analog', 'parts_logic', 'parts_passive', 'parts_lcsc', 'lcsc_catalog', 'mcu', 'parts_mcu',
+  'pyboard', 'parts_py', 'periph', 'ethnet', 'picasm', 'pic16', 'pic18', 'stm32', 'cpuchip', 'examples', 'ui', 'ui_lcsc', 'mats', 'kicad', 'ui_net', 'upload'];
 
 // Kompilatory pobierane dla platformy docelowej. Klucze platform: linux-x64, win32-x64, darwin-x64, darwin-arm64.
 // {dir} = katalog główny po rozpakowaniu archiwum (jeśli archiwum ma jeden katalog nadrzędny, jest on pomijany).

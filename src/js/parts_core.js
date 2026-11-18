@@ -156,7 +156,7 @@ def('led', {
     if (r.burnt) s += smoke(6, -60) + tx(10, -30, '×', { s: 16, c: '#ff6b6b' });
     return s + tx(-9, -1, '+', { s: 9, c: '#e9eef2' });
   },
-  sim: ledSim(c => (LED_COL[c.props.color] || LED_COL.red).vf),
+  sim: ledSim(c => c.props.vf || (LED_COL[c.props.color] || LED_COL.red).vf), // vf – opcjonalnie z karty katalogowej (biblioteka zewnętrzna)
   readings: (c, r) => [['U', si(r.U, 'V')], ['I', si(r.I, 'A')], [{ pl: 'Stan', en: 'State' }, r.burnt ? { pl: 'przepalona', en: 'burnt out' } : r.br > 0.02 ? { pl: 'świeci', en: 'on' } : { pl: 'zgaszona', en: 'off' }]],
 });
 

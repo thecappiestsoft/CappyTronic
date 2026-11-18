@@ -31,6 +31,66 @@ Ethernet (ENC28J60 z wirtualnym routerem).
   * bootloader UART STM32 – Blue Pill;
   * surowy REPL MicroPythona – ESP32, ESP8266, Pico W.
 
+* **Biblioteka zewnętrzna (LCSC):** osobna zakładka palety z katalogiem popularnych części ze sklepu LCSC – opis niżej.
+
+## Biblioteka zewnętrzna (LCSC)
+
+Zakładka **Biblioteka zewnętrzna** w palecie części zawiera katalog popularnych elementów sprzedawanych w sklepie
+[LCSC](https://www.lcsc.com/). Każda pozycja ma numer LCSC (np. `C25804`), numer producenta, producenta, obudowę
+i parametry z karty katalogowej. Pozycję przeciąga się na matę jak zwykły element. Wstawiony element pamięta numer
+LCSC: panel właściwości pokazuje dane pozycji, a eksport do KiCad dodaje pole `LCSC` (przydatne przy montażu w JLCPCB).
+
+Katalog jest zapisany w aplikacji (`src/js/lcsc_catalog.js`) i działa bez internetu. Aplikacja nie pobiera danych
+ze sklepu. Katalog zawiera tylko fakty (oznaczenia i parametry), bez opisów i zdjęć ze sklepu. Przed zamówieniem
+sprawdź dostępność i dokładny wariant na lcsc.com.
+
+**Wyszukiwarka.** Każde słowo zapytania musi pasować:
+
+|Zapytanie|Znajduje|
+|-|-|
+|`C25804`, `c258`|numer LCSC (od początku numeru)|
+|`0603WAF1002T5E`, `AMS1117`|numer producenta, nazwę rodziny|
+|`rezystor 0402`, `mosfet p`, `schottky`|nazwę, kategorię, obudowę, typ|
+|`10k`, `100n`, `3.3V`|wartości parametrów|
+|`r=10k`, `c<=1u`, `vout=3.3`, `vds>=30`, `ic>0.5`|parametry z karty (`=`, `:`, `<`, `<=`, `>`, `>=`, przedrostki SI)|
+
+Klucze parametrów: `r`, `pw` (moc), `c`, `v`, `vout`, `vin`, `i`, `vdrop`, `vf`, `vr`, `vz`, `vce`, `ic`, `hfe`,
+`vds`, `id`, `vth`, `rds`, `gbw`, `ch`, `vcc`, `iq`, `baud`, `bits`. Pod polem wyszukiwania można też wybrać
+kategorię i pokazać tylko pozycje z pełnym modelem.
+
+**Co jest symulowane.** Katalog ma 72 pozycje. 68 z nich ma **pełny model**, czyli model elektryczny z parametrami
+z karty katalogowej:
+
+* rezystory 0402/0603/0805 (wartość i moc znamionowa) i kondensatory MLCC;
+* diody LED SMD z napięciem przewodzenia z karty;
+* diody: 1N4148W, M7 (1N4007), SS14 i B5819W (model 1N5819), SS34, SS210, Zener ZMM5V6;
+* tranzystory BJT: MMBT3904, MMBT3906, MMBT2222A, 2N3906, S8050, SS8050, SS8550;
+* MOSFET-y: 2N7002, BSS138, AO3400A, AO3401A, SI2301CDS;
+* stabilizatory LDO: AMS1117 (1,8 / 3,3 / 5 V), XC6206, ME6211, AP2112K oraz TL431;
+* wzmacniacze i komparatory: LM358, LM324, LMV324 (wyjście rail-to-rail), LM393;
+* NE555, 74HC00, 74HC14, 74HC595, EEPROM AT24C02, transoptor PC817, przycisk TS-1187A i przekaźnik SRD-05VDC-SL-C.
+
+Pozostałe 4 pozycje mają **model zastępczy**. Są to CH340G, CH340C, FT232RL i DS3231: symulator ma je jako moduły
+z uproszczonym zestawem wyprowadzeń, a panel właściwości opisuje różnice. Elementy SMD są rysowane jak ich odpowiedniki
+przewlekane i mają te same parametry elektryczne. Numery nóżek obudowy SMD podaje opis elementu. Wejście EN
+stabilizatorów ME6211 i AP2112 jest w symulatorze zawsze włączone.
+
+**Dodawanie pozycji.** Dopisz obiekt do tablicy `LCSC_CATALOG` w `src/js/lcsc_catalog.js`, np.:
+
+```js
+{ lcsc: 'C25804', mpn: '0603WAF1002T5E', mfr: 'UNI-ROYAL', pkg: '0603', cat: 'res', type: 'resistor',
+  props: { r: 10e3, w: 0.1 }, p: { r: 10e3, pw: 0.1, tol: 1 }, sim: 'full' },
+```
+
+* `type` to istniejący element symulatora (klucz `PARTS`), a `props` to jego właściwości (np. `model`, `v`, `vf`).
+  Dla rezystorów, kondensatorów i diod LED są skróty `lcR`, `lcC` i `lcLed`.
+* `p` to parametry do wyszukiwania (liczby w jednostkach SI, klucze z `LCSC_PARAMS`).
+* `sim: 'approx'` wymaga pola `note` z opisem różnic.
+* Część bez modelu w symulatorze najpierw dopisz jako rodzinę w `src/js/parts_lcsc.js` (zob. `docs/ARCHITEKTURA.md`).
+
+Numer LCSC i dane bierz z karty katalogowej producenta i strony produktu. Potem uruchom `node tests/t_lcsc.js`:
+test sprawdza poprawność wszystkich pozycji i wstawia każdą z nich do symulacji.
+
 ## Struktura katalogów
 
 ```
@@ -40,12 +100,14 @@ src/
     util, i18n            narzędzia, tłumaczenia PL/EN
     engine, draw          silnik symulacji (MNA, zdarzenia cyfrowe), rysowanie SVG
     parts\_\*.js            elementy: podstawowe, półprzewodniki, analogowe, logiczne, pasywne, mikrokontrolery AVR
+    parts\_lcsc, lcsc\_catalog  biblioteka zewnętrzna: rodziny modeli i katalog części LCSC
     mcu.js                integracja avr8js (AVR), port szeregowy, zegar
     pyboard.js, parts\_py  płytki MicroPython/C++ (Worker + SharedArrayBuffer)
     periph.js, ethnet.js  moduły peryferyjne, ENC28J60 + wirtualna sieć
     picasm, pic16, pic18  asembler MPASM i emulatory PIC
     stm32.js, cpuchip.js  emulator Cortex-M3 + STM32F103, wspólna obsługa układów z własnym rdzeniem
     examples, ui, mats    przykłady, interfejs, maty z opisem modułów
+    ui\_lcsc               zakładka „Biblioteka zewnętrzna” i wyszukiwarka katalogu
     kicad.js, ui\_net      eksport/import KiCad, panel MQTT
     upload.js             wgrywanie do prawdziwych urządzeń (Web Serial)
   assets/               ikony, dane (mapy pinów, czcionki wyświetlaczy)
