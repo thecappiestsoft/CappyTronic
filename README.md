@@ -5,7 +5,7 @@ i cyfrowa, mikrokontrolery programowane w Arduino C++, MicroPythonie i asemblerz
 eksport do JSON i KiCad oraz wgrywanie programów do prawdziwych płytek przez USB. Interfejs po polsku i angielsku,
 działa offline.
 
-Wersja: **2.5.0**
+Wersja: **2.6.0**
 
 ## Co jest w środku
 
@@ -21,6 +21,7 @@ i czasem z dokładnością do cyklu procesora.
 |PIC16F84A, PIC18F4550|własne emulatory rdzeni|asembler MPASM (wbudowany asembler) albo plik HEX|
 
 * **Peryferia:** wyświetlacze (HD44780, SSD1306, ST7920, TFT), ekspandery, RTC, ADC/DAC, pamięci, CAN (MCP2515),
+silniki krokowe NEMA ze sterownikami A4988/DRV8825, magnetyczny enkoder AS5600,
 Ethernet (ENC28J60 z wirtualnym routerem).
 * **Sieć:** wbudowany serwer MQTT (aedes), połączenia płytek przez sieć komputera; domyślnie tylko sieć lokalna.
 * **Wgrywanie przez USB:** Web Serial. Obsługiwane metody:
@@ -91,6 +92,23 @@ stabilizatorów ME6211 i AP2112 jest w symulatorze zawsze włączone.
 Numer LCSC i dane bierz z karty katalogowej producenta i strony produktu. Potem uruchom `node tests/t_lcsc.js`:
 test sprawdza poprawność wszystkich pozycji i wstawia każdą z nich do symulacji.
 
+## Silniki krokowe i enkoder AS5600
+
+W kategorii **Przekaźniki i elementy wykonawcze** są:
+
+* **Silnik krokowy NEMA** (rozmiary 11, 14, 17, 23; typowe parametry m.in. 17HS4401) – bipolarny, 1,8° na krok.
+  Model: cewki R + L, SEM ruchu, moment zaczepowy, tarcie, bezwładność wirnika i opcjonalne obciążenie wału.
+  Za szybki start bez rampy albo za duże obciążenie powodują gubienie kroków, a przy dużej prędkości spada prąd i moment.
+* **A4988** (pełny krok … 1/16, VMOT 8–35 V) i **DRV8825** (… 1/32, 8,2–45 V) – sterowniki STEP/DIR w układzie
+  modułów Pololu. Regulacja prądu cewek (ograniczenie ustawiane jak potencjometrem Vref), EN̅, SLP̅, RST̅,
+  zabezpieczenie podnapięciowe, straty mocy i ostrzeżenia (np. niepodłączony RST̅ w A4988).
+
+W kategorii **Przetworniki ADC / DAC** jest **AS5600** – 12-bitowy magnetyczny enkoder kąta (I2C, adres 0x36).
+Magnes może siedzieć na wale wybranego silnika (krokowego lub DC) albo być obracany suwakiem. Symulowane są rejestry
+RAW ANGLE, ANGLE (skalowanie ZPOS/MPOS/MANG), STATUS (MD/ML/MH), AGC, MAGNITUDE, CONF (histereza, wyjście OUT:
+analogowe albo PWM), pin DIR i programowanie OTP (BURN). Przykład „Silnik krokowy NEMA 17 i enkoder AS5600” pokazuje
+sterowanie z rampą i odczyt kąta przez `Wire`.
+
 ## Struktura katalogów
 
 ```
@@ -142,9 +160,9 @@ na Apple Silicon działa przez Rosettę. Można też wskazać własny: `AVR\_GCC
 
 |System|Polecenie|Wynik w `dist/`|
 |-|-|-|
-|Linux|`./build-scripts/build-linux.sh`|`CappyTronic-2.5.0-Linux-x64.tar.gz`|
-|Windows|`build-scripts\build-windows.bat` (dwuklik)|`CappyTronic-2.5.0-Windows-x64.zip`|
-|macOS|`./build-scripts/build-mac.sh` albo dwuklik `build-scripts/build-mac.command`|`CappyTronic-2.5.0-macOS-<arch>.zip`|
+|Linux|`./build-scripts/build-linux.sh`|`CappyTronic-2.6.0-Linux-x64.tar.gz`|
+|Windows|`build-scripts\build-windows.bat` (dwuklik)|`CappyTronic-2.6.0-Windows-x64.zip`|
+|macOS|`./build-scripts/build-mac.sh` albo dwuklik `build-scripts/build-mac.command`|`CappyTronic-2.6.0-macOS-<arch>.zip`|
 |Jeden plik HTML|`./build-scripts/build-html.sh` / `build-scripts\build-html.bat`|`CappyTronic.html`|
 
 Skrypty leżą w folderze `build-scripts/`, ale zawsze pracują w katalogu głównym repozytorium – można je uruchamiać
