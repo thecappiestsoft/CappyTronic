@@ -155,6 +155,52 @@ void loop() {
   x = (x + 4) % 128;
 }
 `,
+  stepper: `// Silnik krokowy NEMA 17 + sterownik A4988 + enkoder AS5600
+// STEP -> pin 3, DIR -> pin 4, AS5600 na I2C (A4 = SDA, A5 = SCL)
+// Rampa przyspieszania: bez niej silnik ruszający od razu z dużą prędkością gubi kroki.
+#include <Wire.h>
+
+const int STEP = 3, DIR = 4;
+
+uint16_t as5600(uint8_t reg) {          // odczyt 12-bitowego rejestru (RAW ANGLE = 0x0C)
+  Wire.beginTransmission(0x36);
+  Wire.write(reg);
+  Wire.endTransmission(false);
+  Wire.requestFrom(0x36, 2);
+  uint16_t h = Wire.read();
+  return (h << 8) | Wire.read();
+}
+
+void obrot(int kroki, bool wPrawo) {
+  digitalWrite(DIR, wPrawo ? HIGH : LOW);
+  for (int i = 0; i < kroki; i++) {
+    int odl = min(i, kroki - 1 - i);               // odległość od początku/końca ruchu
+    int przerwa = max(1200, 4000 - odl * 60);      // rampa: 4 ms -> 1,2 ms na krok
+    digitalWrite(STEP, HIGH);
+    delayMicroseconds(5);
+    digitalWrite(STEP, LOW);
+    delayMicroseconds(przerwa);
+  }
+}
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();
+  pinMode(STEP, OUTPUT);
+  pinMode(DIR, OUTPUT);
+}
+
+void loop() {
+  obrot(200, true);                              // 200 pełnych kroków = 1 obrót
+  Serial.print("Kat AS5600: ");
+  Serial.println(as5600(0x0C) * 360.0 / 4096, 1);
+  delay(500);
+  obrot(100, false);                             // pół obrotu z powrotem
+  Serial.print("Kat AS5600: ");
+  Serial.println(as5600(0x0C) * 360.0 / 4096, 1);
+  delay(500);
+}
+`,
   servo: `// Serwo sterowane potencjometrem (A0 -> pin 9)
 #include <Servo.h>
 
@@ -218,6 +264,11 @@ const EXAMPLES = [
     comps: [['ard_uno', 0, 0], ['eth_enc28j60', 600, -420], ['pot', 360, 160, 0, { r: 10000, pos: 0.5 }]],
     wires: [[1, 'SO', 0, 'D12', [], 4], [1, 'SI', 0, 'D11', [], 2], [1, 'SCK', 0, 'D13', [], 5], [1, 'CS', 0, 'D10', [], 3], [1, 'VCC', 0, '3.3V', [], 0], [1, 'GND', 0, 'GND', [], 1],
       [2, 0, 0, '5V', [], 0], [2, 2, 0, 'GND', [], 1], [2, 1, 0, 'A0', [], 4]], code: [0, SKETCH.enc_web, 'enc_web'] },
+  { g: GM, n: { pl: 'Silnik krokowy NEMA 17 i enkoder AS5600', en: 'NEMA 17 stepper and AS5600 encoder' }, d: { pl: 'A4988 (STEP/DIR) obraca silnik z rampą, AS5600 mierzy kąt wału', en: 'An A4988 (STEP/DIR) turns the motor with a ramp, an AS5600 measures the shaft angle' },
+    comps: [['ard_uno', 0, 0], ['drv_a4988', 520, -260], ['stepper', 1000, -200, 0, { model: 'nema17' }], ['enc_as5600', 1000, -520], ['dcsupply', 560, 160, 0, { v: 12, ilim: 2 }]],
+    wires: [[1, 'STEP', 0, 'D3', [], 4], [1, 'DIR', 0, 'D4', [], 5], [1, 'RST̅', 1, 'SLP̅', [], 3], [1, 'VDD', 0, '5V', [], 0], [1, 15, 0, 'GND', [], 1], [1, 9, 4, 1, [], 1], [1, 'VMOT', 4, 0, [], 0],
+      [1, '1A', 2, 0, [], 1], [1, '1B', 2, 1, [], 3], [1, '2A', 2, 2, [], 0], [1, '2B', 2, 3, [], 2], [4, 1, 0, 'GND', [], 1],
+      [3, 'VCC', 0, '5V', [], 0], [3, 'GND', 0, 'GND', [], 1], [3, 'SDA', 0, 'A4', [], 2], [3, 'SCL', 0, 'A5', [], 4]], code: [0, SKETCH.stepper, 'stepper'] },
   { g: GM, n: { pl: 'Serwo i potencjometr', en: 'Servo and potentiometer' }, d: { pl: 'analogRead() z potencjometru ustawia kąt serwa', en: 'analogRead() from a potentiometer sets the servo angle' },
     comps: [['ard_uno', 0, 0], ['pot', 360, 120, 0, { r: 10000, pos: 0.5 }], ['servo', 620, -480]],
     wires: [[1, 0, 0, '5V', [[360, 140], [260, 140]], 0], [1, 2, 0, 'GND', [[400, 150], [280, 150]], 1], [1, 1, 0, 'A0', [[380, 160], [440, 160], [440, 40], [360, 40]], 4], [2, 2, 0, 'D9', [[660, -440], [300, -440]], 5], [2, 1, 0, '5V', [[640, -460], [720, -460], [720, 60], [260, 60]], 0], [2, 0, 0, 'GND', [[620, -470], [200, -470]], 1]], code: [0, SKETCH.servo, 'servo'] },

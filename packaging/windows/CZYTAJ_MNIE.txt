@@ -1,4 +1,4 @@
-CappyTronic 2.5.0 dla Windows (x64)
+CappyTronic 2.6.0 dla Windows (x64)
 ===================================
 
 Uruchomienie: rozpakuj archiwum w dowolnym miejscu i uruchom cappytronic.exe (instalacja nie jest potrzebna).

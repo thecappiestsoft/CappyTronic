@@ -36,7 +36,7 @@ function kiNets() {
   }
   return { root: (c, i) => f(K(c.id, i)) };
 }
-const KI_REF = { resistor: 'R', res_net: 'RN', pot: 'RV', capacitor: 'C', cap_cer: 'C', inductor: 'L', transformer: 'T', led: 'D', led_rgb: 'D', ws2812: 'D', switch: 'SW', button: 'SW', buzzer: 'BZ', motor: 'M', bulb: 'LA', battery: 'BT', relay: 'K', servo: 'M', dcsupply: 'J', mains: 'J' };
+const KI_REF = { resistor: 'R', res_net: 'RN', pot: 'RV', capacitor: 'C', cap_cer: 'C', inductor: 'L', transformer: 'T', led: 'D', led_rgb: 'D', ws2812: 'D', switch: 'SW', button: 'SW', buzzer: 'BZ', motor: 'M', bulb: 'LA', battery: 'BT', relay: 'K', servo: 'M', stepper: 'M', dcsupply: 'J', mains: 'J' };
 function kiRefPrefix(P) {
   if (KI_REF[P.id]) return KI_REF[P.id];
   if (P.cat === 'diode') return 'D'; if (P.cat === 'bjt' || P.cat === 'fet' || P.cat === 'thy') return 'Q';
@@ -72,7 +72,7 @@ function kiFootprint(c) {
     case 'buzzer': return 'Buzzer_Beeper:Buzzer_12x9.5RM7.6';
     case 'button': return 'Button_Switch_THT:SW_PUSH_6mm';
     case 'mains': return 'TerminalBlock:TerminalBlock_bornier-2_P5.08mm';
-    case 'battery': case 'dcsupply': case 'switch': case 'motor': case 'bulb': case 'servo': case 'ws2812': return FP_HDR(np);
+    case 'battery': case 'dcsupply': case 'switch': case 'motor': case 'bulb': case 'servo': case 'stepper': case 'ws2812': return FP_HDR(np);
     case 'd_1n4148': case 'd_zener': return 'Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal';
     case 'd_1n400x': return 'Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal';
     case 'd_schottky': return p.model === 'BAT54' ? 'Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal' : 'Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal';

@@ -1,4 +1,4 @@
-CappyTronic 2.5.0 dla macOS
+CappyTronic 2.6.0 dla macOS
 ===========================
 
 Uruchomienie: przeciągnij CappyTronic.app do folderu Programy. Aplikacja nie jest podpisana certyfikatem Apple, więc

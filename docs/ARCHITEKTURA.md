@@ -152,6 +152,22 @@ Dodawanie kolejnych pozycji:
 Uwaga do modeli BJT: czynnik Early’ego w `bjtI` (`parts_semi.js`) jest liczony z |U_CE|. Dawniej dla U_CE < 0
 malał do 0,1 i dawał fałszywe rozwiązania Newtona, np. PNP jako klucz górny ustalał się na kilkudziesięciu woltach.
 
+## Napędy (`parts_motion.js`)
+
+Moduł leży po `periph` (korzysta z `modPart`, `pidx`, `devPowered`).
+
+* `stepper` – silnik hybrydowy: dwie gałęzie R + L z SEM `e_A = −k·ω·sin(50θ)`, `e_B = k·ω·cos(50θ)` (całkowanie niejawne
+  jak w `motor`), moment `k·(−i_A·sin + i_B·cos)` minus moment zaczepowy (okres 1,8°), tarcie i obciążenie. Mechanika
+  w podkrokach po 5 µs w `commit`; `maxDt` = 100 µs. Parametry rozmiarów w `STEPPERS`.
+* `stepDriver(id, o)` – wspólny model A4988 i DRV8825. Translator: kąt elektryczny w jednostkach 90°/32, start 45°;
+  krok na zboczu narastającym STEP (`onIn`). Mostki są liniowe odcinkowo: tryb `I` (źródło prądu zadanego) albo
+  `+`/`−` (±VMOT przez R_DS(on)); tryb wybiera hak `post` po rozwiązaniu, więc obwód zostaje liniowy (bez Newtona).
+  Prąd z VMOT liczony z bilansu mocy poprzedniego kroku.
+* `enc_as5600` – rejestry wg karty katalogowej (`asRegs`); kąt wału bierze z `ENC_SHAFT` (stepper: `s.th`, motor: `s.ang`).
+  Lista silników w panelu to `ui` z `get opts()`.
+
+Testy: `tests/t_motion.js`.
+
 ## Testy
 
 `npm test` uruchamia `tests/run-all.js`. Testy ładują `dist/CappyTronic.html` do jsdom i budują obwody kodem.
