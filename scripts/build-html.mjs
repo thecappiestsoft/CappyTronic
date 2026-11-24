@@ -48,7 +48,7 @@ export async function buildHtml() {
   const scripts = (await avr8js()) + '\n;\n' + cm + '\n;\n' + app;
   let html = read(path.join(P.src, 'shell.html'))
     .replace('/*FONTS*/', () => fonts()).replace('/*CMCSS*/', () => read(nm('codemirror', 'lib', 'codemirror.css')))
-    .replace('%%ICON%%', 'data:image/png;base64,' + b64(A('icon160.png'))).replace('%%CAPPY%%', 'data:image/png;base64,' + b64(A('cappy.png')))
+    .replaceAll('%%ICON%%', 'data:image/png;base64,' + b64(A('icon160.png'))).replaceAll('%%CAPPY%%', 'data:image/png;base64,' + b64(A('cappy.png')))
     .replace('<script>/*SCRIPTS*/</script>', () => '<script>' + scripts.replace(/<\/script/g, '<\\/script') + '</script>');
   const out = path.join(P.dist, 'CappyTronic.html'); fs.writeFileSync(out, html);
   log(`HTML: ${out} (${Math.round(html.length / 1024)} KB)`);
