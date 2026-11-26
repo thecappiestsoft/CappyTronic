@@ -380,7 +380,7 @@ def('scope', {
       for (const [ch, col, vd] of [[1, '#f2d33c', c.props.v1], [2, '#3fd0e8', c.props.v2]]) {
         let pth = '', k = 0;
         for (let i = 0; i < buf.n; i++) {
-          const j = (buf.i - buf.n + i + buf.N) % buf.N, tt = buf.t[j]; if (tt < tStart - 1e-12) continue;
+          const j = (buf.i - buf.n + i + buf.N) % buf.N, tt = buf.t[j]; if (tt < tStart - 1e-12) continue; if (tt > tEnd + 1e-12) break;
           const v = ch === 1 ? buf.a[j] : buf.b[j];
           const x = x0 + (tt - tStart) / span * W, y = clamp(y0 + H / 2 - v / vd * (H / 8), y0, y0 + H);
           pth += (k++ ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
